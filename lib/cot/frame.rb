@@ -10,6 +10,7 @@ module Cot
     end
 
     def exists?
+      #TODO: Have this key off a defined primary key instead of defaulting to id
       id
     end
 
