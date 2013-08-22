@@ -9,11 +9,11 @@ Using cot is pretty simple, include it in your project and then have your class 
 
 Frame provides some helpful methods:
 - Class Methods
-  - property
-    - Property 
-  - search\_property
+    - property
+        - Property 
+    - search\_property
 - Instance Methods
-  - foo
+    - foo
 
 ```ruby
 class ExampleObject < Cot::Frame
