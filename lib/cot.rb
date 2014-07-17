@@ -5,7 +5,6 @@ require 'cot/frame'
 require 'json'
 
 module Cot
-
   def version_string
     "Cot version #{Cot::VERSION}"
   end

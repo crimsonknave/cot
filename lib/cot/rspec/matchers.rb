@@ -12,13 +12,12 @@ RSpec::Matchers.define :set_search_property do |field|
     self
   end
 end
+
 RSpec::Matchers.define :set_property do |field|
   match do |base|
     @tests = {}
     @tests[:attr_methods] = base.attr_methods.include?(field.to_sym)
-    if @from
-      @tests[:mappings] =  base.mappings[@from.to_sym] == field
-    end
+    @tests[:mappings] =  base.mappings[@from.to_sym] == field if @from
     if @searchable
       key = @from ? @from : field
       @tests[:searchable] = base.search_mappings[field] == key
@@ -34,21 +33,21 @@ RSpec::Matchers.define :set_property do |field|
     @from = from
     self
   end
+
   def searchable
     @searchable = true
     self
   end
 
   description do
-    from_string = @from ? "from #{@from}" : ""
-    search_string = @searchable ? "to be searchable" : ""
-    "should set property #{field} #{from_string} #{search_string}"
+    from_string = @from ? "from #{@from}" : ''
+    search_string = @searchable ? 'to be searchable' : ''
+    "sets property #{field} #{from_string} #{search_string}"
   end
 
-  failure_message_for_should do
-    failed = @tests.select{|k,v| !v}.keys
+  failure_message do
+    failed = @tests.keys.select { |v| !v }
     "Expected the property #{field} to be set, but the following attributes weren't set correctly #{failed}"
   end
 
 end
-

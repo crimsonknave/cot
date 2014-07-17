@@ -5,18 +5,19 @@ module Cot
     end
     include ActiveModel::Dirty
 
-    def initialize(payload={})
+    def initialize(payload = {})
       @data = convert_keys payload
     end
 
     def exists?
-      #TODO: Have this key off a defined primary key instead of defaulting to id
+      # TODO: Have this key off a defined primary key instead of defaulting to id
       id
     end
 
     def defined_properties
       self.class.attr_methods
     end
+
     def properties_mapping
       self.class.mappings
     end
@@ -33,7 +34,7 @@ module Cot
       self.class.inverted_search_mappings ||= search_mappings.invert
     end
 
-    def self.search_property(name, args={})
+    def self.search_property(name, args = {})
       @search_mappings ||= {}
 
       key = args[:from] ? args[:from] : name
@@ -43,11 +44,11 @@ module Cot
     # TODO: Create an enum declaration that will automagically map a symbol to
     # another value (such as an int) so that the user of the library doesn't need
     # to know what number scheduled status is (for example)
-    def self.enum(name, args={})
-      raise "enum is not yet implemented"
+    def self.enum(_name, _args = {})
+      fail 'enum is not yet implemented'
     end
 
-    def self.property(name, args={})
+    def self.property(name, args = {})
       @mappings ||= {}
       @attr_methods ||= []
       @search_mappings ||= {}
@@ -82,12 +83,13 @@ module Cot
     def serializable_hash
       attrs = {}
       defined_properties.each do |m|
-        attrs[inverted_properties_mapping.fetch(m,m)] = self[m]
+        attrs[inverted_properties_mapping.fetch(m, m)] = self[m]
       end
       attrs
     end
 
     private
+
     def convert_key(key)
       key = key.to_sym
       properties_mapping.fetch(key, key).to_sym
@@ -96,11 +98,8 @@ module Cot
     def convert_keys(hash)
       return {} unless hash
       {}.tap do |ret|
-        hash.each_pair do |k,v|
-          ret[convert_key k] = v
-        end
+        hash.each_pair { |k, v| ret[convert_key k] = v }
       end
     end
-
   end
 end

@@ -8,6 +8,13 @@ RSpec::Core::RakeTask.new('spec') do |spec|
   spec.rspec_opts = '--tag ~broken'
 end
 
+require 'rubocop'
+if defined? RuboCop
+  desc 'run rubocop'
+  task :rubocop do
+    puts `rubocop`
+  end
+end
 
-task :default => :spec
-task :test => :spec
+task default: [:spec, :rubocop]
+task test: :spec
