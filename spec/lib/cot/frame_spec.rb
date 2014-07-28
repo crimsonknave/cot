@@ -10,13 +10,43 @@ describe Cot::Frame do
   end
   subject { @foo }
   its(:to_json) { should be_kind_of String }
-  its(:serializable_hash) { should be_kind_of Hash }
-  it 'has two keys' do
-    expect(subject.serializable_hash.size).to eq 2
-  end
   it 'needs more serialziable tests'
   its(:id) { should eq 5 }
   its(:foo) { should eq 'this will be foo' }
+
+  context 'serializable_hash' do
+    its(:serializable_hash) { should be_kind_of Hash }
+    it 'has two keys' do
+      expect(subject.serializable_hash.size).to eq 2
+    end
+
+    it 'should accept an option hash' do
+      expect do
+        subject.serializable_hash(only: :foo)
+      end.to_not raise_error
+    end
+
+    context 'only option' do
+      it 'should return properties specified' do
+        expect(subject.serializable_hash(only: :foo).size).to eq 1
+        expect(subject.serializable_hash(only: :foo)[:bar]).to eq 'this will be foo'
+        expect(subject.serializable_hash(only: [:foo, :id]).size).to eq 2
+        expect(subject.serializable_hash(only: 'foo').size).to eq 1
+        expect(subject.serializable_hash(only: 'foo')[:bar]).to eq 'this will be foo'
+        expect(subject.serializable_hash(only: :blah).size).to eq 0
+      end
+    end
+
+    context 'except option' do
+      it 'should not return properties specified' do
+        expect(subject.serializable_hash(except: :foo).size).to eq 1
+        expect(subject.serializable_hash(except: :foo)[:id]).to eq 5
+        expect(subject.serializable_hash(except: [:foo, :id]).size).to eq 0
+        expect(subject.serializable_hash(except: 'foo').size).to eq 1
+        expect(subject.serializable_hash(except: 'foo')[:id]).to eq 5
+      end
+    end
+  end
 
   context 'exists?' do
     it 'is true if id is present' do
