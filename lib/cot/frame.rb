@@ -80,14 +80,13 @@ module Cot
       serializable_hash.to_json
     end
 
-    def serializable_hash(options = nil)
+    def serializable_hash(options = {})
       attrs = {}
-      options ||= {}
       properties_list = defined_properties
-      if only = options[:only]
-          properties_list &= Array(only).map(&:to_sym)
-      elsif except = options[:except]
-          properties_list -= Array(except).map(&:to_sym)
+      if options[:only]
+        properties_list &= Array(options[:only]).map(&:to_sym)
+      elsif options[:except]
+        properties_list -= Array(options[:except]).map(&:to_sym)
       end
       properties_list.each do |m|
         attrs[inverted_properties_mapping.fetch(m, m)] = self[m]
