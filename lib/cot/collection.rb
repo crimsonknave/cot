@@ -28,7 +28,7 @@ module Cot
     end
 
     def update_members(payload)
-      # NOTE: replacing objects is lazy, but I don't want to deal with updating and such righ tnow
+      # NOTE: replacing objects is lazy, but I don't want to deal with updating and such right now
       initialize_objects(payload)
     end
 
