@@ -6,6 +6,7 @@ module Cot
     include ActiveModel::Dirty
 
     def initialize(payload = {})
+      @errors = {}
       @data = convert_keys payload
     end
 
@@ -68,12 +69,18 @@ module Cot
       define_attribute_method name
     end
 
+    attr_accessor :errors
+
     def [](key)
       @data[convert_key key]
     end
 
     def []=(key, value)
       @data[convert_key key] = value
+    end
+
+    def valid?
+      errors.empty?
     end
 
     def to_json
