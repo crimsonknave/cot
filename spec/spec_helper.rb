@@ -1,5 +1,8 @@
 ENV['RAILS_ENV'] ||= 'test'
 
+require 'simplecov'
+SimpleCov.start
+
 require 'cot'
 require 'rspec'
 require 'rspec/its'

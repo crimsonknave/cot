@@ -14,6 +14,7 @@ describe Cot::Frame do
   it 'has two keys' do
     expect(subject.serializable_hash.size).to eq 2
   end
+
   it 'needs more serialziable tests'
   its(:id) { should eq 5 }
   its(:foo) { should eq 'this will be foo' }
@@ -22,6 +23,7 @@ describe Cot::Frame do
     it 'is true if id is present' do
       expect(@foo.exists?).to be_truthy
     end
+
     it 'is false if id is not present' do
       foo = TestObject.new(foo: 5)
       expect(foo.exists?).to be_falsey
@@ -31,6 +33,7 @@ describe Cot::Frame do
     it 'includes foo' do
       expect(@foo.defined_properties).to include :foo
     end
+
     it 'is an array' do
       expect(@foo.defined_properties).to be_kind_of Array
     end
@@ -70,6 +73,7 @@ describe Cot::Frame do
       expect(TestObject.mappings).to have_key :bar
       expect(TestObject.mappings[:bar]).to be :foo
     end
+
     it 'creates accessor methods' do
       foo = TestObject.new
       expect(foo).to respond_to :foo
@@ -84,6 +88,29 @@ describe Cot::Frame do
       foo = TestObject.new
       expect(foo).to receive('[]').once.and_return 'this is foo'
       expect(foo.foo).to eq 'this is foo'
+    end
+  end
+
+  context 'errors' do
+    it 'has an errors property' do
+      expect(@foo).to respond_to :errors
+      expect(@foo.errors).to be_empty
+    end
+  end
+
+  context 'errors=' do
+    it 'sets errors' do
+      @foo.errors = { status: 200 }
+      expect(@foo.errors[:status]).to eq 200
+    end
+  end
+  context 'enum' do
+    it 'is not implemented' do
+      expect do
+        class TestObject < Cot::Frame
+          enum 'asdf'
+        end
+      end.to raise_exception StandardError
     end
   end
 end
