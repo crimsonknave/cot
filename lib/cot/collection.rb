@@ -26,7 +26,7 @@ module Cot
     end
 
     def errors
-      Hash[@objects.reject { |x| x.valid? }.map { |x| [x.id, x.errors] }]
+      Hash[@objects.reject(&:valid?).map { |x| [x.id, x.errors] }]
     end
 
     def update_members(payload)
