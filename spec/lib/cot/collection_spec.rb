@@ -81,11 +81,25 @@ describe Cot::Collection do
       expect(coll.first).to be_kind_of FakeDouble
     end
 
-    it 'takes an optional sub_key to pull the object out of the payload' do
+    it 'takes an optional sub_key option to pull the object out of the payload' do
+      coll = Cot::Collection.new FakeDouble, [{ inner: { fooy: :bar } }, { inner: { asdf: :fdas } }], sub_key: :inner
+      expect(coll.first).to be_kind_of FakeDouble
+      expect(coll.first.fooy).to eq :bar
+    end
+
+    it 'takes an optional default_attributes option to add set attributes in every object.' do
+      coll = Cot::Collection.new FakeDouble, [{ fooy: :bar }, { asdf: :fdas }], default_attributes: { foo: :baz }
+      expect(coll).to all( be_kind_of FakeDouble )
+      expect(coll.map(&:foo).uniq).to eq [:baz]
+    end
+  
+    it 'support a legacy optional sub_key parameter to pull the object out of the payload' do
       coll = Cot::Collection.new FakeDouble, [{ inner: { fooy: :bar } }, { inner: { asdf: :fdas } }], :inner
       expect(coll.first).to be_kind_of FakeDouble
       expect(coll.first.fooy).to eq :bar
     end
+
+      
   end
 
   context 'update members' do

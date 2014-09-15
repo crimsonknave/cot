@@ -1,8 +1,11 @@
 module Cot
   class Collection < SimpleDelegator
-    def initialize(klass, objects, sub_key = false)
+    def initialize(klass, objects, options = {})
+      options = { sub_key: options } unless options.is_a?(Hash)
+      @options = options.with_indifferent_access
+      @options[:default_attributes] = {} unless @options[:default_attributes].is_a?(Hash)
       @klass = klass
-      @sub_key = sub_key
+      @sub_key = @options[:sub_key]
       @objects = objects
 
       # If you pass in different types of things here we can't be friends
@@ -42,9 +45,9 @@ module Cot
       @objects = []
       @objects = objects.map do |payload|
         if @sub_key
-          @klass.new payload[@sub_key]
+          @klass.new @options[:default_attributes].merge(payload.fetch(@sub_key, {}))
         else
-          @klass.new payload
+          @klass.new @options[:default_attributes].merge(payload || {})
         end
       end
 
