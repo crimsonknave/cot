@@ -5,7 +5,6 @@ module Cot
       @options = options.with_indifferent_access
       @options[:default_attributes] = {} unless @options[:default_attributes].is_a?(Hash)
       @klass = klass
-      @sub_key = @options[:sub_key]
       @objects = objects
 
       # If you pass in different types of things here we can't be friends
@@ -44,8 +43,8 @@ module Cot
     def initialize_objects(objects)
       @objects = []
       @objects = objects.map do |payload|
-        if @sub_key
-          @klass.new @options[:default_attributes].merge(payload.fetch(@sub_key, {}))
+        if @options[:sub_key]
+          @klass.new @options[:default_attributes].merge(payload.fetch(@options[:sub_key], {}))
         else
           @klass.new @options[:default_attributes].merge(payload || {})
         end
