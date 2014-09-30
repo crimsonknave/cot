@@ -1,13 +1,22 @@
 module Cot
   class Frame
-    class << self
-      attr_accessor :mappings, :inverted_mappings, :attr_methods, :search_mappings, :inverted_search_mappings
-    end
+    attr_accessor :errors
+
+    extend FrameClassMethods
+
     include ActiveModel::Dirty
 
     def initialize(payload = {})
       @errors = {}
+
       @data = convert_keys payload
+
+      @data.each do |k, v|
+        if self.class.value_blocks[k]
+          block = self.class.value_blocks[k]
+          @data[k] = instance_exec(v, &block)
+        end
+      end
     end
 
     def exists?
@@ -34,42 +43,6 @@ module Cot
     def inverted_search_mappings
       self.class.inverted_search_mappings ||= search_mappings.invert
     end
-
-    def self.search_property(name, args = {})
-      @search_mappings ||= {}
-
-      key = args[:from] ? args[:from] : name
-      @search_mappings[name] = key
-    end
-
-    # TODO: Create an enum declaration that will automagically map a symbol to
-    # another value (such as an int) so that the user of the library doesn't need
-    # to know what number scheduled status is (for example)
-    def self.enum(_name, _args = {})
-      fail 'enum is not yet implemented'
-    end
-
-    def self.property(name, args = {})
-      @mappings ||= {}
-      @attr_methods ||= []
-      @search_mappings ||= {}
-      key = args[:from]
-      @mappings[key.to_sym] = name if key
-      @search_mappings[name] = key ? key : name if args[:searchable]
-      attr_methods << name.to_sym
-
-      define_method name do
-        self[name]
-      end
-
-      define_method "#{name}=" do |value|
-        send("#{name}_will_change!") unless value == self[name]
-        self[name] = value
-      end
-      define_attribute_method name
-    end
-
-    attr_accessor :errors
 
     def [](key)
       @data[convert_key key]

@@ -118,6 +118,43 @@ describe Cot::Frame do
       expect(foo).to receive('[]').once.and_return 'this is foo'
       expect(foo.foo).to eq 'this is foo'
     end
+
+    context 'passing a block' do
+      before :each do
+        class Foo
+          attr_reader :params
+          def initialize(params)
+            @params = params
+          end
+        end
+        class TestObject < Cot::Frame
+          property :my_id, from: :id
+          property :thing do
+            from :stuff
+            searchable true
+            value do |params|
+              Foo.new params.merge passed: my_id
+            end
+          end
+        end
+        @foo = TestObject.new(stuff: { key: 'this will be in foo' }, id: 42)
+      end
+
+      it 'adds to mappings' do
+        expect(TestObject.mappings).to have_key :stuff
+        expect(TestObject.mappings[:stuff]).to be :thing
+      end
+
+      it 'stores searchable' do
+        expect(TestObject.search_mappings).to have_key :thing
+        expect(TestObject.search_mappings[:thing]).to be :stuff
+      end
+
+      it 'assigns sets the value' do
+        expect(@foo.thing).to be_kind_of Foo
+        expect(@foo.thing.params[:passed]).to eq 42
+      end
+    end
   end
 
   context 'errors' do
@@ -134,12 +171,37 @@ describe Cot::Frame do
     end
   end
   context 'enum' do
-    it 'is not implemented' do
+    before :each do
+      class TestObject < Cot::Frame
+        enum :types do
+          entry :first
+          entry :third, value: 3
+          entry :fourth
+        end
+      end
+      @foo = TestObject.new
+    end
+    it 'sets the value starting at 1' do
+      expect(@foo.types.first).to eq 1
+    end
+
+    it 'allows the value to be set' do
+      expect(@foo.types.third).to eq 3
+    end
+
+    it 'increments after the next value' do
+      expect(@foo.types.fourth).to eq 4
+    end
+
+    it 'does not allow duplicates' do
       expect do
         class TestObject < Cot::Frame
-          enum 'asdf'
+          enum :types do
+            entry :first
+            entry :first_again, value: 1
+          end
         end
-      end.to raise_exception StandardError
+      end.to raise_error StandardError
     end
   end
 end
