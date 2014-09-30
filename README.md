@@ -3,7 +3,57 @@ cot
 
 Cot is a gem designed to help convert rest based resources into ruby objects.  Currently it only handles converting the responses into objects and doesn't deal with the requests themselves, there are plenty of gems for that out there.
 
-### Usage
+### Example
+
+```ruby
+class NestedClass < Cot::Frame
+  property :parent_id
+  property :foo, from: :bar
+end
+
+class ExampleObject < Cot::Frame
+  property :id
+  property :name, :searchable => true
+  property :company_name, :from => :companyName
+  property :item do
+    from :place
+    value do |params|
+      NestedClass.new params.merge parent_id: id
+    end
+  end
+  enum :types do
+    entry :first
+    entry :third, value: 3
+    entry :fourth
+  end
+  search_property :created_at, :from => :createdOn
+end
+
+class ExampleCollection < Cot::Collection
+  def initialize(objects, options = {})
+    super ExampleObject, objects, options
+  end
+end
+
+thingy = ExampleObject.new(id: :my_id, name: 'awesome name', createdOn: Time.now, place: {bar: 'this is nested.foo'})
+thingy.id # 5
+thingy.name # awesome name
+thingy.types.fourth # 4
+thingy.item # NestedClass instance
+thingy.item.foo # 'this is nested.foo'
+thingy.created_at # what time it is now
+thingy.defined\_properties # [:id, :name, :created_at]
+
+collection = ExampleCollection.new [{ id: :my_id, name: 'awesome name', createdOn: Time.now }, { id: :my_id, name: 'awesome name', createdOn: Time.now }], { default_attributes: { default: :attribute }
+collection.first.name # 'awesome name'
+collection.first.default # :attribute
+collection.exists? # Do all of the entries exist?
+collection.update_members [{ id: 1, name: 'new awesome name', createdOn: Time.now }, { id: 2, name: 'new awesome name', createdOn: Time.now }]
+collection.first.name # 'new awesome name'
+```
+
+
+### Details
 
 Using cot is pretty simple. There are two main classes: Collection and Frame. Collections are basically big arrays that contain objects (presumably Frame objects). Collection provides some helper methods to manage the collection, but also delegates to Array, so each, map and all that good stuff are there as well. Frame allows you to declare how the object will convert a json payload into an object.
 
@@ -49,42 +99,3 @@ Collection provides the following methods:
   - exists? returns true if *all* the members exist
   - changed? returns true if *any* of the members have changed
   - update\_members updates the members of the collection to based on the payload (this can add or remove members)
-
-```ruby
-class ExampleObject < Cot::Frame
-  property :id
-  property :name, :searchable => true
-  property :company_name, :from => :companyName
-  property :item do
-    from :place
-    value do |params|
-      MyClass.new params.merge parent_id: id
-    end
-  end
-  enum :types do
-    entry :first
-    entry :third, value: 3
-    entry :fourth
-  end
-  search_property :created_at, :from => :createdOn
-end
-
-class ExampleCollection < Cot::Collection
-  def initialize(objects, options = {})
-    super ExampleObject, objects, options
-  end
-end
-
-thingy = ExampleObject.new(id: :my_id, name: 'awesome name', createdOn: Time.now)
-thingy.id # 5
-thingy.name # awesome name
-thingy.created_at # what time it is now
-thingy.defined\_properties # [:id, :name, :created_at]
-
-collection = ExampleCollection.new [{ id: :my_id, name: 'awesome name', createdOn: Time.now }, { id: :my_id, name: 'awesome name', createdOn: Time.now }], { default_attributes: { default: :attribute }
-collection.first.name # 'awesome name'
-collection.first.default # :attribute
-collection.exists? # Do all of the entries exist?
-collection.update_members [{ id: 1, name: 'new awesome name', createdOn: Time.now }, { id: 2, name: 'new awesome name', createdOn: Time.now }]
-collection.first.name # 'new awesome name'
-```
