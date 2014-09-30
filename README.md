@@ -9,9 +9,22 @@ Using cot is pretty simple. There are two main classes: Collection and Frame. Co
 
 Frame provides some helpful methods:
 - Class Methods
-    - property adds the first parameter as an accessor on the object.  There are two optional arguments, from and searchable.  From indicates that the property has an alternate key in the incoming/outgoing data.  Searchable adds the property to the search mappings.
+    - property
+      - The first parameter is the name of the property and it is added as a method to the object.
+      - You can pass additional options in two ways, first you can pass a hash of options to property and secondly you can pass a block to property.
+      - There are three optional arguments, value, from and searchable.  
+      - From indicates that the property has an alternate key in the incoming/outgoing data.  
+      - Searchable adds the property to the search mappings.
+      - Value takes a block and overwrites the value of the property to be the result of the block
+        - This is useful for nested objects.
+        - The block is executed as part of the instance of the object, so you have access to other properties.
+        - The block takes one parameter, which is the value of the hash for that key (what the value would have been if there was no value block).
     - search\_property adds the parameter to the search mapping.  It takes an optional from argument which inidates the property has an alternate key in the incoming/outgoing data.
-    - enum *NOT SUPPORTED* If you'd like to see this let me know. Also let me know what you'd want it to look like.
+    - enum takes a name and a block
+      - The block expects a series of entries to be declared
+      - enum starts counting at 1 by default
+      - Each entry will have the value of 1 higher than the previous by default
+      - An optional value parameter can be passed which sets the entries value to that number. This lets you skip a numer, start higher or lower or even be non-sequential.
 - Instance Methods
     - defined\_properties returns a list of the defined properties
     - properties\_mapping returns a hash containing all of the renamed properties.  The keys are the values of the from argument and the values are the property name.
@@ -42,6 +55,17 @@ class ExampleObject < Cot::Frame
   property :id
   property :name, :searchable => true
   property :company_name, :from => :companyName
+  property :item do
+    from :place
+    value do |params|
+      MyClass.new params.merge parent_id: id
+    end
+  end
+  enum :types do
+    entry :first
+    entry :third, value: 3
+    entry :fourth
+  end
   search_property :created_at, :from => :createdOn
 end
 
