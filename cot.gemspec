@@ -11,6 +11,7 @@ Gem::Specification.new do |s|
   s.homepage = 'http://github.com/crimsonknave/cot'
   s.summary = 'Simplifies creating models for rest based resources'
   s.description = 'Simplifies creating models for rest based resources'
+  s.license = 'MIT'
 
   s.files         = `git ls-files`.split("\n")
   s.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")
