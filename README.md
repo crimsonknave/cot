@@ -24,6 +24,10 @@ Frame provides some helpful methods:
     - errors used to store any errors associated with the object
 
 Collection provides the following methods:
+- Initialization
+  - You can pass options to the collection when you initialize
+  - sub\_key: Uses the contents inside the sub\_key
+  - default_attributes: Will add the keys/values to the object
 - Instance Methods
   - The following methods collate the results from members
     - serializable\_hash
@@ -42,8 +46,8 @@ class ExampleObject < Cot::Frame
 end
 
 class ExampleCollection < Cot::Collection
-  def initialize(params)
-    super ExampleObject, params
+  def initialize(objects, options = {})
+    super ExampleObject, objects, options
   end
 end
 
@@ -53,8 +57,9 @@ thingy.name # awesome name
 thingy.created_at # what time it is now
 thingy.defined\_properties # [:id, :name, :created_at]
 
-collection = ExampleCollection.new [{ id: :my_id, name: 'awesome name', createdOn: Time.now }, { id: :my_id, name: 'awesome name', createdOn: Time.now }]
+collection = ExampleCollection.new [{ id: :my_id, name: 'awesome name', createdOn: Time.now }, { id: :my_id, name: 'awesome name', createdOn: Time.now }], { default_attributes: { default: :attribute }
 collection.first.name # 'awesome name'
+collection.first.default # :attribute
 collection.exists? # Do all of the entries exist?
 collection.update_members [{ id: 1, name: 'new awesome name', createdOn: Time.now }, { id: 2, name: 'new awesome name', createdOn: Time.now }]
 collection.first.name # 'new awesome name'
