@@ -17,6 +17,9 @@ module Cot
     def enum(name, &block)
       obj = Enum.new
       obj.instance_eval(&block)
+      define_singleton_method name do
+        obj
+      end
       define_method name do
         obj
       end

@@ -38,6 +38,7 @@ end
 thingy = ExampleObject.new(id: :my_id, name: 'awesome name', createdOn: Time.now, place: {bar: 'this is nested.foo'})
 thingy.id # 5
 thingy.name # awesome name
+ExampleObject.types.first # 1
 thingy.types.fourth # 4
 thingy.item # NestedClass instance
 thingy.item.foo # 'this is nested.foo'
@@ -62,8 +63,8 @@ Frame provides some helpful methods:
     - property
       - The first parameter is the name of the property and it is added as a method to the object.
       - You can pass additional options in two ways, first you can pass a hash of options to property and secondly you can pass a block to property.
-      - There are three optional arguments, value, from and searchable.  
-      - From indicates that the property has an alternate key in the incoming/outgoing data.  
+      - There are three optional arguments, value, from and searchable.
+      - From indicates that the property has an alternate key in the incoming/outgoing data.
       - Searchable adds the property to the search mappings.
       - Value takes a block and overwrites the value of the property to be the result of the block
         - This is useful for nested objects.
@@ -71,6 +72,7 @@ Frame provides some helpful methods:
         - The block takes one parameter, which is the value of the hash for that key (what the value would have been if there was no value block).
     - search\_property adds the parameter to the search mapping.  It takes an optional from argument which inidates the property has an alternate key in the incoming/outgoing data.
     - enum takes a name and a block
+      - Enums are defined on the instances and the class
       - The block expects a series of entries to be declared
       - enum starts counting at 1 by default
       - Each entry will have the value of 1 higher than the previous by default

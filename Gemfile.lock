@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    cot (0.3.0)
+    cot (0.4.0)
       activemodel
 
 GEM

@@ -181,16 +181,32 @@ describe Cot::Frame do
       end
       @foo = TestObject.new
     end
-    it 'sets the value starting at 1' do
-      expect(@foo.types.first).to eq 1
+    context 'object' do
+      it 'sets the value starting at 1' do
+        expect(@foo.types.first).to eq 1
+      end
+
+      it 'allows the value to be set' do
+        expect(@foo.types.third).to eq 3
+      end
+
+      it 'increments after the next value' do
+        expect(@foo.types.fourth).to eq 4
+      end
     end
 
-    it 'allows the value to be set' do
-      expect(@foo.types.third).to eq 3
-    end
+    context 'class' do
+      it 'sets the value starting at 1' do
+        expect(TestObject.types.first).to eq 1
+      end
 
-    it 'increments after the next value' do
-      expect(@foo.types.fourth).to eq 4
+      it 'allows the value to be set' do
+        expect(TestObject.types.third).to eq 3
+      end
+
+      it 'increments after the next value' do
+        expect(TestObject.types.fourth).to eq 4
+      end
     end
 
     it 'does not allow duplicates' do
