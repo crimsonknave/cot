@@ -39,6 +39,7 @@ thingy = ExampleObject.new(id: :my_id, name: 'awesome name', createdOn: Time.now
 thingy.id # 5
 thingy.name # awesome name
 ExampleObject.types.first # 1
+ExampleObject.types[:third] # 3
 thingy.types.fourth # 4
 thingy.item # NestedClass instance
 thingy.item.foo # 'this is nested.foo'
@@ -73,6 +74,7 @@ Frame provides some helpful methods:
     - search\_property adds the parameter to the search mapping.  It takes an optional from argument which inidates the property has an alternate key in the incoming/outgoing data.
     - enum takes a name and a block
       - Enums are defined on the instances and the class
+      - Enum defines a method for each entry and also allows readonly hash access
       - The block expects a series of entries to be declared
       - enum starts counting at 1 by default
       - Each entry will have the value of 1 higher than the previous by default

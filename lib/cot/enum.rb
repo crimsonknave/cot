@@ -19,5 +19,9 @@ module Cot
       @num = value + 1
       used[value] = name
     end
+
+    def [](key)
+      send key
+    end
   end
 end
