@@ -42,7 +42,7 @@ thingy.types.fourth # 4
 thingy.item # NestedClass instance
 thingy.item.foo # 'this is nested.foo'
 thingy.created_at # what time it is now
-thingy.defined\_properties # [:id, :name, :created_at]
+thingy.defined_properties # [:id, :name, :created_at]
 
 collection = ExampleCollection.new [{ id: :my_id, name: 'awesome name', createdOn: Time.now }, { id: :my_id, name: 'awesome name', createdOn: Time.now }], { default_attributes: { default: :attribute }
 collection.first.name # 'awesome name'
