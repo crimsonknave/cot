@@ -154,6 +154,13 @@ describe Cot::Frame do
         expect(@foo.thing).to be_kind_of Foo
         expect(@foo.thing.params[:passed]).to eq 42
       end
+
+      it 'sets the value on []=' do
+        bar = TestObject.new(id: 42)
+        bar.thing = { key: 'this will be in foo' }
+        expect(bar.thing).to be_kind_of Foo
+        expect(bar.thing.params[:passed]).to eq 42
+      end
     end
   end
 

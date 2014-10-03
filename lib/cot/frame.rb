@@ -49,6 +49,10 @@ module Cot
     end
 
     def []=(key, value)
+      if self.class.value_blocks[key]
+        block = self.class.value_blocks[key]
+        value = instance_exec(value, &block)
+      end
       @data[convert_key key] = value
     end
 
