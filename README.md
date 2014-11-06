@@ -21,6 +21,11 @@ class ExampleObject < Cot::Frame
       NestedClass.new params.merge parent_id: id
     end
   end
+  property :blank do
+    missing do
+      "Item #{id}"
+    end
+  end
   enum :types do
     entry :first
     entry :third, value: 3
@@ -45,6 +50,7 @@ thingy.item # NestedClass instance
 thingy.item.foo # 'this is nested.foo'
 thingy.created_at # what time it is now
 thingy.defined_properties # [:id, :name, :created_at]
+thingy.blank # 'Item 5'
 
 collection = ExampleCollection.new [{ id: :my_id, name: 'awesome name', createdOn: Time.now }, { id: :my_id, name: 'awesome name', createdOn: Time.now }], { default_attributes: { default: :attribute }
 collection.first.name # 'awesome name'

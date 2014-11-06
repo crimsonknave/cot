@@ -5,6 +5,7 @@ module Cot
                   :inverted_search_mappings,
                   :search_mappings,
                   :value_blocks,
+                  :missing_blocks,
                   :mappings
 
     def search_property(name, args = {})
@@ -30,17 +31,25 @@ module Cot
       prop = Property.new args
       prop.instance_eval(&block) if block
 
-      @value_blocks[name] = prop.value if prop.value
-
-      key = prop.from
-      @mappings[key.to_sym] = name if key
-      @search_mappings[name] = key ? key : name if prop.searchable
-      attr_methods << name.to_sym
+      set_blocks(name, prop)
+      set_mappings(name, prop)
 
       define_property_methods name
     end
 
     private
+
+    def set_blocks(name, prop)
+      @value_blocks[name] = prop.value if prop.value
+      @missing_blocks[name] = prop.missing if prop.missing
+    end
+
+    def set_mappings(name, prop)
+      key = prop.from
+      @mappings[key.to_sym] = name if key
+      @search_mappings[name] = key ? key : name if prop.searchable
+      attr_methods << name.to_sym
+    end
 
     # Can't seem to get an intialize in for the class, so we need to set these
     # before we do stuff for property
@@ -49,6 +58,7 @@ module Cot
       @attr_methods ||= []
       @search_mappings ||= {}
       @value_blocks ||= {}
+      @missing_blocks ||= {}
     end
 
     def define_property_methods(name)

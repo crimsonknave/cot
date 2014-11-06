@@ -17,6 +17,13 @@ module Cot
           @data[k] = instance_exec(v, &block)
         end
       end
+
+      defined_properties.each do |prop|
+        if @data[prop].nil? && self.class.missing_blocks[prop]
+          block = self.class.missing_blocks[prop]
+          @data[prop] = instance_exec(self, &block)
+        end
+      end
     end
 
     def exists?
@@ -25,7 +32,7 @@ module Cot
     end
 
     def defined_properties
-      self.class.attr_methods
+      self.class.attr_methods || []
     end
 
     def properties_mapping

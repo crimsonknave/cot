@@ -129,6 +129,11 @@ describe Cot::Frame do
         end
         class TestObject < Cot::Frame
           property :my_id, from: :id
+          property :blank do
+            missing do
+              "this was blank #{my_id}"
+            end
+          end
           property :thing do
             from :stuff
             searchable true
@@ -150,7 +155,11 @@ describe Cot::Frame do
         expect(TestObject.search_mappings[:thing]).to be :stuff
       end
 
-      it 'assigns sets the value' do
+      it 'stores missing' do
+        expect(@foo.blank).to eq 'this was blank 42'
+      end
+
+      it 'sets the value' do
         expect(@foo.thing).to be_kind_of Foo
         expect(@foo.thing.params[:passed]).to eq 42
       end

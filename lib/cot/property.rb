@@ -5,9 +5,11 @@ module Cot
       @args = params
     end
 
-    def value(&block)
-      return args[:value] unless block
-      args[:value] = block
+    [:missing, :value].each do |method_name|
+      define_method method_name do |&block|
+        return args[method_name] unless block
+        args[method_name] = block
+      end
     end
 
     [:from, :searchable].each do |method_name|
