@@ -71,34 +71,97 @@ describe Cot::Collection do
   end
 
   context 'initialize' do
-    it 'does not process the objects if they are already the correct class' do
-      coll = Cot::Collection.new FakeDouble, [FakeDouble.new(fooy: :bar), FakeDouble.new(asdf: :fdas)]
-      expect(coll.first).to be_kind_of FakeDouble
+    context 'when passing a class' do
+      context 'with options' do
+        it 'takes an optional sub_key option to pull the object out of the payload' do
+          coll = Cot::Collection.new FakeDouble,
+                                     [{ inner: { fooy: :bar } }, { inner: { asdf: :fdas } }],
+                                     sub_key: :inner
+          expect(coll.first).to be_kind_of FakeDouble
+          expect(coll.first.fooy).to eq :bar
+        end
+
+        it 'takes an optional default_attributes option to add set attributes in every object.' do
+          coll = Cot::Collection.new FakeDouble, [{ fooy: :bar }, { asdf: :fdas }], default_attributes: { foo: :baz }
+          expect(coll).to all be_kind_of FakeDouble
+          expect(coll.map(&:foo).uniq).to eq [:baz]
+        end
+
+        it 'support a legacy optional sub_key parameter to pull the object out of the payload' do
+          coll = Cot::Collection.new FakeDouble, [{ inner: { fooy: :bar } }, { inner: { asdf: :fdas } }], :inner
+          expect(coll.first).to be_kind_of FakeDouble
+          expect(coll.first.fooy).to eq :bar
+        end
+      end
+
+      context 'without options' do
+        it 'does not process the objects if they are already the correct class' do
+          coll = Cot::Collection.new FakeDouble, [FakeDouble.new(fooy: :bar), FakeDouble.new(asdf: :fdas)]
+          expect(coll.first).to be_kind_of FakeDouble
+        end
+
+        it 'creates new instances of the passed klass if the objects are not already the class' do
+          coll = Cot::Collection.new FakeDouble, [{ fooy: :bar }, { asdf: :fdas }]
+          expect(coll.first).to be_kind_of FakeDouble
+        end
+      end
     end
 
-    it 'creates new instances of the passed klass if the objects are not already the class' do
-      coll = Cot::Collection.new FakeDouble, [{ fooy: :bar }, { asdf: :fdas }]
-      expect(coll.first).to be_kind_of FakeDouble
-    end
+    context 'when not passing a class' do
+      before :each do
+        class MyCollection < Cot::Collection
+          collected_class FakeDouble
+        end
+      end
 
-    it 'takes an optional sub_key option to pull the object out of the payload' do
-      coll = Cot::Collection.new FakeDouble, [{ inner: { fooy: :bar } }, { inner: { asdf: :fdas } }], sub_key: :inner
-      expect(coll.first).to be_kind_of FakeDouble
-      expect(coll.first.fooy).to eq :bar
-    end
+      context 'with options' do
+        it 'takes an optional sub_key option to pull the object out of the payload' do
+          coll = MyCollection.new [{ inner: { fooy: :bar } }, { inner: { asdf: :fdas } }], sub_key: :inner
+          expect(coll.first).to be_kind_of FakeDouble
+          expect(coll.first.fooy).to eq :bar
+        end
 
-    it 'takes an optional default_attributes option to add set attributes in every object.' do
-      coll = Cot::Collection.new FakeDouble, [{ fooy: :bar }, { asdf: :fdas }], default_attributes: { foo: :baz }
-      expect(coll).to all be_kind_of FakeDouble
-      expect(coll.map(&:foo).uniq).to eq [:baz]
-    end
+        it 'takes an optional default_attributes option to add set attributes in every object.' do
+          coll = MyCollection.new [{ fooy: :bar }, { asdf: :fdas }], default_attributes: { foo: :baz }
+          expect(coll).to all be_kind_of FakeDouble
+          expect(coll.map(&:foo).uniq).to eq [:baz]
+        end
+      end
 
-    it 'support a legacy optional sub_key parameter to pull the object out of the payload' do
-      coll = Cot::Collection.new FakeDouble, [{ inner: { fooy: :bar } }, { inner: { asdf: :fdas } }], :inner
-      expect(coll.first).to be_kind_of FakeDouble
-      expect(coll.first.fooy).to eq :bar
-    end
+      context 'options using dsl' do
+        it 'subkey works' do
+          class MyCollection
+            sub_key :inner
+          end
 
+          coll = MyCollection.new [{ inner: { fooy: :bar } }, { inner: { asdf: :fdas } }]
+          expect(coll.first).to be_kind_of FakeDouble
+          expect(coll.first.fooy).to eq :bar
+        end
+
+        it 'takes an optional default_attributes option to add set attributes in every object.' do
+          class MyCollection
+            default_attributes foo: :baz
+          end
+
+          coll = MyCollection.new [{ fooy: :bar }, { asdf: :fdas }]
+          expect(coll).to all be_kind_of FakeDouble
+          expect(coll.map(&:foo).uniq).to eq [:baz]
+        end
+      end
+
+      context 'without options' do
+        it 'does not process the objects if they are already the correct class' do
+          coll = Cot::Collection.new [FakeDouble.new(fooy: :bar), FakeDouble.new(asdf: :fdas)]
+          expect(coll.first).to be_kind_of FakeDouble
+        end
+
+        it 'creates new instances of the passed klass if the objects are not already the class' do
+          coll = Cot::Collection.new [{ fooy: :bar }, { asdf: :fdas }]
+          expect(coll.first).to be_kind_of FakeDouble
+        end
+      end
+    end
   end
 
   context 'update members' do

@@ -1,14 +1,19 @@
 module Cot
   class Collection < SimpleDelegator
-    def initialize(klass, objects, options = {})
-      options = { sub_key: options } unless options.is_a?(Hash)
-      @options = options.with_indifferent_access
-      @options[:default_attributes] = {} unless @options[:default_attributes].is_a?(Hash)
-      @klass = klass
-      @objects = objects
+    extend CollectionClassMethods
 
+    # We take an array of params here and then parse them due to backwards compat crap
+    # Collection can take 1-3 parameters and there are two cases when it gets two
+    # 3: klass, objects, options
+    # 2: klass, objects
+    # 2: objects, options
+    # 1: objects
+    def initialize(*params)
+      parse_params(params)
+
+      puts self.class.klass.inspect
       # If you pass in different types of things here we can't be friends
-      initialize_objects(objects) unless objects.first.is_a? klass
+      initialize_objects(@objects) unless @objects.first.is_a? self.class.klass
 
       super @objects
     end
@@ -40,13 +45,36 @@ module Cot
 
     private
 
+    def parse_params(params)
+      until params.empty?
+        item = params.shift
+        if item.class == Class
+          self.class.klass = item
+        elsif item.class == Array
+          @objects = item
+        else
+          options = item
+        end
+      end
+      options ||= {}
+      parse_options(options)
+    end
+
+    def parse_options(options)
+      options = { sub_key: options } unless options.is_a?(Hash)
+      @options = options.with_indifferent_access
+      @options[:default_attributes] = {} unless @options[:default_attributes].is_a?(Hash)
+      self.class.set_default_values
+      @options.merge! self.class.options
+    end
+
     def initialize_objects(objects)
       @objects = []
       @objects = objects.map do |payload|
         if @options[:sub_key]
-          @klass.new @options[:default_attributes].merge(payload.fetch(@options[:sub_key], {}))
+          self.class.klass.new @options[:default_attributes].merge(payload.fetch(@options[:sub_key], {}))
         else
-          @klass.new @options[:default_attributes].merge(payload || {})
+          self.class.klass.new @options[:default_attributes].merge(payload || {})
         end
       end
 

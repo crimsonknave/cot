@@ -40,6 +40,14 @@ class ExampleCollection < Cot::Collection
   end
 end
 
+# No initialize required, just pass in the objects
+class ExampleDSLCollection < Cot::Collection
+  collected_class ExampleObject
+  sub_key :key
+  default_attributes default: :attributes
+end
+
+
 thingy = ExampleObject.new(id: :my_id, name: 'awesome name', createdOn: Time.now, place: {bar: 'this is nested.foo'})
 thingy.id # 5
 thingy.name # awesome name
@@ -100,10 +108,12 @@ Frame provides some helpful methods:
     - errors used to store any errors associated with the object
 
 Collection provides the following methods:
+- DSL
+  - If you don't need any special behavior in your initialize, you can use the DSL to declare the class, sub\_key and default\_attributes
 - Initialization
   - You can pass options to the collection when you initialize
   - sub\_key: Uses the contents inside the sub\_key
-  - default_attributes: Will add the keys/values to the object
+  - default\_attributes: Will add the keys/values to the object
 - Instance Methods
   - The following methods collate the results from members
     - serializable\_hash

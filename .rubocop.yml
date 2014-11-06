@@ -6,3 +6,6 @@ Documentation:
 
 MethodLength:
   Max: 15
+
+Style/TrivialAccessors:
+  AllowDSLWriters: true
