@@ -14,6 +14,10 @@ describe Cot::Frame do
   its(:id) { should eq 5 }
   its(:foo) { should eq 'this will be foo' }
 
+  it 'primary key defaults to id' do
+    expect(@foo.exists?).to be 5
+  end
+
   context 'serializable_hash' do
     its(:serializable_hash) { should be_kind_of Hash }
     it 'has two keys' do
@@ -128,7 +132,7 @@ describe Cot::Frame do
           end
         end
         class TestObject < Cot::Frame
-          property :my_id, from: :id
+          property :my_id, from: :key, primary: true
           property :blank do
             missing do
               "this was blank #{my_id}"
@@ -142,7 +146,7 @@ describe Cot::Frame do
             end
           end
         end
-        @foo = TestObject.new(stuff: { key: 'this will be in foo' }, id: 42)
+        @foo = TestObject.new(stuff: { key: 'this will be in foo' }, key: 42)
       end
 
       it 'adds to mappings' do
@@ -159,13 +163,17 @@ describe Cot::Frame do
         expect(@foo.blank).to eq 'this was blank 42'
       end
 
+      it 'sets the primary key' do
+        expect(@foo.exists?).to be 42
+      end
+
       it 'sets the value' do
         expect(@foo.thing).to be_kind_of Foo
         expect(@foo.thing.params[:passed]).to eq 42
       end
 
       it 'sets the value on []=' do
-        bar = TestObject.new(id: 42)
+        bar = TestObject.new(key: 42)
         bar.thing = { key: 'this will be in foo' }
         expect(bar.thing).to be_kind_of Foo
         expect(bar.thing.params[:passed]).to eq 42

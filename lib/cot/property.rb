@@ -5,6 +5,14 @@ module Cot
       @args = params
     end
 
+    def primary
+      args[:primary] = true
+    end
+
+    def primary?
+      args[:primary]
+    end
+
     [:missing, :value].each do |method_name|
       define_method method_name do |&block|
         return args[method_name] unless block

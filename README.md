@@ -13,7 +13,7 @@ end
 
 class ExampleObject < Cot::Frame
   property :id
-  property :name, :searchable => true
+  property :name, :searchable => true, primary: true
   property :company_name, :from => :companyName
   property :item do
     from :place
@@ -51,6 +51,7 @@ thingy.item.foo # 'this is nested.foo'
 thingy.created_at # what time it is now
 thingy.defined_properties # [:id, :name, :created_at]
 thingy.blank # 'Item 5'
+thingy.exists? # 'awesome name'
 
 collection = ExampleCollection.new [{ id: :my_id, name: 'awesome name', createdOn: Time.now }, { id: :my_id, name: 'awesome name', createdOn: Time.now }], { default_attributes: { default: :attribute }
 collection.first.name # 'awesome name'
@@ -70,9 +71,11 @@ Frame provides some helpful methods:
     - property
       - The first parameter is the name of the property and it is added as a method to the object.
       - You can pass additional options in two ways, first you can pass a hash of options to property and secondly you can pass a block to property.
-      - There are three optional arguments, value, from and searchable.
+      - There are five optional arguments, value, from, missing, primary and searchable.
       - From indicates that the property has an alternate key in the incoming/outgoing data.
       - Searchable adds the property to the search mappings.
+      - Primary indicates that this is the primary key. Currently this only determines what exists? looks at.
+      - Missing takes a block and will execute the block if nothing was passed to the object on initialize. This block is evaluated in the context of the object. So you can for example have a string that says "Object #{id}"
       - Value takes a block and overwrites the value of the property to be the result of the block
         - This is useful for nested objects.
         - The block is executed as part of the instance of the object, so you have access to other properties.

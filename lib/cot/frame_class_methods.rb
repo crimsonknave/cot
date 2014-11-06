@@ -6,6 +6,7 @@ module Cot
                   :search_mappings,
                   :value_blocks,
                   :missing_blocks,
+                  :primary_key,
                   :mappings
 
     def search_property(name, args = {})
@@ -33,6 +34,7 @@ module Cot
 
       set_blocks(name, prop)
       set_mappings(name, prop)
+      @primary_key = name if prop.primary?
 
       define_property_methods name
     end
@@ -59,6 +61,7 @@ module Cot
       @search_mappings ||= {}
       @value_blocks ||= {}
       @missing_blocks ||= {}
+      @primary_key ||= :id
     end
 
     def define_property_methods(name)

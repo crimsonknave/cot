@@ -27,8 +27,7 @@ module Cot
     end
 
     def exists?
-      # TODO: Have this key off a defined primary key instead of defaulting to id
-      id
+      send self.class.primary_key
     end
 
     def defined_properties
