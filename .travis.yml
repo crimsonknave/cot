@@ -1,0 +1,12 @@
+language: ruby
+rvm:
+- 2.1.4
+- 2.0.0
+deploy:
+  provider: rubygems
+  api_key:
+    secure: LWCk/pKVdaX6qUWGsg+QxImR1nbB0nYzUd7LBSxbY96YXdjjED1pFdwjf2tY184hUBQF+LupWwVjEfPOkRBmGH290qjF4/Bz5z4vs1ZS+k77owMR4aeiVptS05BOUOVLq2CcAuNiVVB3hCRcXAKdd0wFFco4pXqLUAj3GlOjhl4=
+  gem: cot
+  on:
+    tags: true
+    repo: crimsonknave/cot
