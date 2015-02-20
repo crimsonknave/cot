@@ -11,7 +11,6 @@ module Cot
     def initialize(*params)
       parse_params(params)
 
-      puts self.class.klass.inspect
       # If you pass in different types of things here we can't be friends
       initialize_objects(@objects) unless @objects.first.is_a? self.class.klass
 

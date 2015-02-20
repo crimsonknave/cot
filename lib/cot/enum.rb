@@ -12,7 +12,7 @@ module Cot
         fail "#{name} tried to set value #{value}, which is already used by #{used[value]}. Enum values are unique."
       end
 
-      self.class.send :define_method, name do
+      self.class.__send__ :define_method, name do
         value
       end
 
@@ -21,7 +21,7 @@ module Cot
     end
 
     def [](key)
-      send key
+      public_send key
     end
   end
 end
