@@ -4,9 +4,10 @@ describe Cot::Frame do
     class TestObject < Cot::Frame
       property :foo, from: :bar
       property :id
+      property :only
       search_property :john, from: :crichton
     end
-    @foo = TestObject.new(bar: 'this will be foo', id: 5)
+    @foo = TestObject.new(bar: 'this will be foo', id: 5, only: 3)
   end
   subject { @foo }
   its(:to_json) { should be_kind_of String }
@@ -21,12 +22,18 @@ describe Cot::Frame do
   context 'serializable_hash' do
     its(:serializable_hash) { should be_kind_of Hash }
     it 'has two keys' do
-      expect(subject.serializable_hash.size).to eq 2
+      expect(subject.serializable_hash.size).to eq 3
     end
 
     it 'should accept an option hash' do
       expect do
         subject.serializable_hash(only: :foo)
+      end.to_not raise_error
+    end
+
+    it 'does not require an option hash' do
+      expect do
+        subject.serializable_hash
       end.to_not raise_error
     end
 
@@ -43,12 +50,24 @@ describe Cot::Frame do
 
     context 'except option' do
       it 'should not return properties specified' do
-        expect(subject.serializable_hash(except: :foo).size).to eq 1
+        expect(subject.serializable_hash(except: :foo).size).to eq 2
         expect(subject.serializable_hash(except: :foo)[:id]).to eq 5
-        expect(subject.serializable_hash(except: [:foo, :id]).size).to eq 0
-        expect(subject.serializable_hash(except: 'foo').size).to eq 1
+        expect(subject.serializable_hash(except: [:foo, :id]).size).to eq 1
+        expect(subject.serializable_hash(except: 'foo').size).to eq 2
         expect(subject.serializable_hash(except: 'foo')[:id]).to eq 5
       end
+    end
+  end
+
+  context 'valid?' do
+    it 'returns true if there are no errors' do
+      expect(@foo).to receive(:errors).and_return []
+      expect(@foo.valid?).to be true
+    end
+
+    it 'returns false if there is an error' do
+      expect(@foo).to receive(:errors).and_return [1]
+      expect(@foo.valid?).to be false
     end
   end
 
@@ -69,6 +88,13 @@ describe Cot::Frame do
 
     it 'is an array' do
       expect(@foo.defined_properties).to be_kind_of Array
+    end
+
+    it 'defaults to []' do
+      class EmptyObject < Cot::Frame
+      end
+      foo = EmptyObject.new
+      expect(foo.defined_properties).to eq []
     end
   end
   context 'properties_mapping' do
@@ -107,6 +133,13 @@ describe Cot::Frame do
       expect(TestObject.mappings[:bar]).to be :foo
     end
 
+    it 'works for strings and symbols' do
+      foo1 = TestObject.new(bar: 'this will be foo', 'id' => 1)
+      foo2 = TestObject.new(bar: 'this will be foo', id: 2)
+      expect(foo1.id).to eq 1
+      expect(foo2.id).to eq 2
+    end
+
     it 'creates accessor methods' do
       foo = TestObject.new
       expect(foo).to respond_to :foo
@@ -133,6 +166,7 @@ describe Cot::Frame do
         end
         class TestObject < Cot::Frame
           property :my_id, from: :key, primary: true
+          property :foo, from: :bar
           property :blank do
             missing do
               "this was blank #{my_id}"
@@ -159,8 +193,19 @@ describe Cot::Frame do
         expect(TestObject.search_mappings[:thing]).to be :stuff
       end
 
-      it 'stores missing' do
-        expect(@foo.blank).to eq 'this was blank 42'
+      context 'missing' do
+        it 'does not call the block if the value is provided' do
+          foo = TestObject.new(blank: 'blank')
+          expect(foo.blank).to eq 'blank'
+        end
+
+        it 'calls the value if there is a block' do
+          expect(@foo.blank).to eq 'this was blank 42'
+        end
+
+        it 'returns nil if there is no block' do
+          expect(@foo.id).to be_nil
+        end
       end
 
       it 'sets the primary key' do
@@ -172,11 +217,32 @@ describe Cot::Frame do
         expect(@foo.thing.params[:passed]).to eq 42
       end
 
-      it 'sets the value on []=' do
-        bar = TestObject.new(key: 42)
-        bar.thing = { key: 'this will be in foo' }
-        expect(bar.thing).to be_kind_of Foo
-        expect(bar.thing.params[:passed]).to eq 42
+      context '[]' do
+        it 'accesses an unmapped key' do
+          expect(@foo[:blank]).to eq 'this was blank 42'
+        end
+
+        it 'accesses a mapped key' do
+          expect(@foo[:my_id]).to eq 42
+        end
+      end
+
+      context '[]=' do
+        it 'sets the value block' do
+          bar = TestObject.new(key: 42)
+          bar.thing = { key: 'this will be in foo' }
+          expect(bar.thing).to be_kind_of Foo
+          expect(bar.thing.params[:passed]).to eq 42
+          expect(bar[:stuff]).to be_kind_of Foo
+          expect(bar[:thing]).to be_kind_of Foo
+        end
+
+        it 'sets the value if it is not a block' do
+          bar = TestObject.new(key: 42)
+          bar.foo = 'baz'
+          expect(bar.foo).to eq 'baz'
+          expect(bar[:bar]).to eq 'baz'
+        end
       end
     end
   end

@@ -49,5 +49,4 @@ RSpec::Matchers.define :set_property do |field|
     failed = @tests.select { |_, v| !v }.keys
     "Expected the property #{field} to be set, but the following attributes weren't set correctly #{failed}"
   end
-
 end

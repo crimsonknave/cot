@@ -24,7 +24,9 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'shoulda', '>= 0'
   s.add_development_dependency 'bundler', '>= 1.0.0'
   s.add_development_dependency 'rspec', '>= 0'
-  s.add_development_dependency 'rspec-its', '>= 0'
-  s.add_development_dependency 'rubocop', '>= 0.26.0'
+  s.add_development_dependency 'rspec-its', '>= 1'
+  s.add_development_dependency 'rubocop'
   s.add_development_dependency 'simplecov', '>= 0'
+  s.add_development_dependency 'mutant'
+  s.add_development_dependency 'mutant-rspec'
 end

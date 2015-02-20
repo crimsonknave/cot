@@ -16,7 +16,6 @@ describe Cot::Collection do
     end
 
     it 'should respond to array methods' do
-
       # In theory we'd test more, but that's good enough for me
       expect(collection).to respond_to :[]
       expect(collection).to respond_to :first
