@@ -18,3 +18,10 @@ end
 
 task default: [:spec, :rubocop]
 task test: :spec
+
+require 'mutant'
+desc 'Run mutation tests using mutant'
+task :mutant do
+  result = Mutant::CLI.run(%w[-Ilib -rcot --use rspec Cot*])
+  fail unless result == Mutant::CLI::EXIT_SUCCESS
+end

@@ -80,13 +80,21 @@ describe Cot::Collection do
           expect(coll.first.fooy).to eq :bar
         end
 
+        it 'takes options as strings and symbols' do
+          coll = Cot::Collection.new FakeDouble,
+                                     [{ inner: { fooy: :bar } }, { inner: { asdf: :fdas } }],
+                                     'sub_key' => :inner
+          expect(coll.first).to be_kind_of FakeDouble
+          expect(coll.first.fooy).to eq :bar
+        end
+
         it 'takes an optional default_attributes option to add set attributes in every object.' do
           coll = Cot::Collection.new FakeDouble, [{ fooy: :bar }, { asdf: :fdas }], default_attributes: { foo: :baz }
           expect(coll).to all be_kind_of FakeDouble
           expect(coll.map(&:foo).uniq).to eq [:baz]
         end
 
-        it 'support a legacy optional sub_key parameter to pull the object out of the payload' do
+        it 'supports a legacy optional sub_key parameter to pull the object out of the payload' do
           coll = Cot::Collection.new FakeDouble, [{ inner: { fooy: :bar } }, { inner: { asdf: :fdas } }], :inner
           expect(coll.first).to be_kind_of FakeDouble
           expect(coll.first.fooy).to eq :bar
@@ -95,7 +103,17 @@ describe Cot::Collection do
 
       context 'without options' do
         it 'does not process the objects if they are already the correct class' do
-          coll = Cot::Collection.new FakeDouble, [FakeDouble.new(fooy: :bar), FakeDouble.new(asdf: :fdas)]
+          coll = Cot::Collection.new [FakeDouble.new(fooy: :bar), FakeDouble.new(asdf: :fdas)]
+          expect(coll.first).to be_kind_of FakeDouble
+        end
+
+        it 'does not set the subkey if none is provided' do
+          coll = Cot::Collection.new [FakeDouble.new(fooy: :bar), FakeDouble.new(asdf: :fdas)]
+          expect(coll.instance_variable_get :@options).to_not have_key :sub_key
+        end
+
+        it 'can accept empty hashes' do
+          coll = Cot::Collection.new FakeDouble, [{}]
           expect(coll.first).to be_kind_of FakeDouble
         end
 

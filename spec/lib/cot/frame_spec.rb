@@ -2,9 +2,9 @@ require 'spec_helper'
 describe Cot::Frame do
   before :each do
     class TestObject < Cot::Frame
-      property :foo, from: :bar
+      property :foo, from: :bar, searchable: true
       property :id
-      property :only
+      property :only, searchable: true
       search_property :john, from: :crichton
     end
     @foo = TestObject.new(bar: 'this will be foo', id: 5, only: 3)
@@ -131,6 +131,16 @@ describe Cot::Frame do
     it 'adds to mappings' do
       expect(TestObject.mappings).to have_key :bar
       expect(TestObject.mappings[:bar]).to be :foo
+    end
+
+    it 'adds to search properties when searchable is true' do
+      expect(TestObject.search_mappings).to have_key :only
+      expect(TestObject.search_mappings).to have_key :foo
+      expect(TestObject.search_mappings[:foo]).to be :bar
+    end
+
+    it 'does not add to search mappings if not searchable' do
+      expect(TestObject.search_mappings).to_not have_key :id
     end
 
     it 'works for strings and symbols' do

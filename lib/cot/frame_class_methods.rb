@@ -50,7 +50,7 @@ module Cot
       key = prop.from
       @mappings[key.to_sym] = name if key
       @search_mappings[name] = key ? key : name if prop.searchable
-      attr_methods << name.to_sym
+      attr_methods << name
     end
 
     # Can't seem to get an intialize in for the class, so we need to set these
