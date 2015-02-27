@@ -1,4 +1,4 @@
-cot [![Build Status](https://travis-ci.org/crimsonknave/cot.svg?branch=master)](https://travis-ci.org/crimsonknave/cot)
+cot [![Build Status](https://travis-ci.org/crimsonknave/cot.svg?branch=master)](https://travis-ci.org/crimsonknave/cot) [![Gem Version](https://badge.fury.io/rb/cot.svg)](http://badge.fury.io/rb/cot)
 ===
 
 Cot is a gem designed to help convert rest based resources into ruby objects.  Currently it only handles converting the responses into objects and doesn't deal with the requests themselves, there are plenty of gems for that out there.
