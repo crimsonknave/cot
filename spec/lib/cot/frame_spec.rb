@@ -6,6 +6,7 @@ describe Cot::Frame do
       property :id
       property :only, searchable: true
       search_property :john, from: :crichton
+      search_property :pilot
     end
     @foo = TestObject.new(bar: 'this will be foo', id: 5, only: 3)
   end
@@ -98,6 +99,10 @@ describe Cot::Frame do
     end
   end
   context 'properties_mapping' do
+    it 'does not set if there is no from' do
+      expect(@foo.properties_mapping).to_not have_key nil
+    end
+
     it 'has bar => foo' do
       expect(@foo.properties_mapping).to have_key :bar
       expect(@foo.properties_mapping[:bar]).to eq :foo
@@ -125,6 +130,8 @@ describe Cot::Frame do
     it 'adds to search_mappings' do
       expect(TestObject.search_mappings).to have_key :john
       expect(TestObject.search_mappings[:john]).to be :crichton
+      expect(TestObject.search_mappings).to have_key :pilot
+      expect(TestObject.search_mappings[:pilot]).to be :pilot
     end
   end
   context 'property' do
@@ -135,6 +142,7 @@ describe Cot::Frame do
 
     it 'adds to search properties when searchable is true' do
       expect(TestObject.search_mappings).to have_key :only
+      expect(TestObject.search_mappings[:only]).to be :only
       expect(TestObject.search_mappings).to have_key :foo
       expect(TestObject.search_mappings[:foo]).to be :bar
     end
@@ -209,6 +217,11 @@ describe Cot::Frame do
           expect(foo.blank).to eq 'blank'
         end
 
+        it 'does not set the block if missing is false' do
+          foo = TestObject.new(blank: 'blank')
+          expect(foo.foo).to be_nil
+        end
+
         it 'calls the value if there is a block' do
           expect(@foo.blank).to eq 'this was blank 42'
         end
@@ -245,6 +258,18 @@ describe Cot::Frame do
           expect(bar.thing.params[:passed]).to eq 42
           expect(bar[:stuff]).to be_kind_of Foo
           expect(bar[:thing]).to be_kind_of Foo
+        end
+
+        it 'notifys that the field will change if the value is different' do
+          bar = TestObject.new(key: 42, foo: 'thing')
+          expect(bar).to receive(:foo_will_change!).and_return true
+          bar.foo = 'baz'
+        end
+
+        it 'does not notify that the field will change if the value is the same' do
+          bar = TestObject.new(key: 42, foo: 'baz')
+          expect(bar).to_not receive(:foo_will_change!)
+          bar.foo = 'baz'
         end
 
         it 'sets the value if it is not a block' do

@@ -10,8 +10,6 @@ module Cot
                   :mappings
 
     def search_property(name, args = {})
-      @search_mappings ||= {}
-
       key = args[:from] ? args[:from] : name
       @search_mappings[name] = key
     end
@@ -42,13 +40,13 @@ module Cot
     private
 
     def set_blocks(name, prop)
-      @value_blocks[name] = prop.value if prop.value
-      @missing_blocks[name] = prop.missing if prop.missing
+      @value_blocks[name] = prop.value
+      @missing_blocks[name] = prop.missing
     end
 
     def set_mappings(name, prop)
       key = prop.from
-      @mappings[key.to_sym] = name if key
+      @mappings[key] = name if key
       @search_mappings[name] = key ? key : name if prop.searchable
       attr_methods << name
     end
@@ -70,7 +68,8 @@ module Cot
       end
 
       define_method "#{name}=" do |value|
-        send("#{name}_will_change!") unless value == self[name]
+        #FIXME eql?
+        public_send("#{name}_will_change!") unless value.eql?(self[name])
         self[name] = value
       end
       define_attribute_method name
