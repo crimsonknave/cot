@@ -12,7 +12,6 @@ describe Cot::Frame do
   end
   subject { @foo }
   its(:to_json) { should be_kind_of String }
-  it 'needs more serialziable tests'
   its(:id) { should eq 5 }
   its(:foo) { should eq 'this will be foo' }
 

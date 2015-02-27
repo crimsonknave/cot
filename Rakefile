@@ -2,18 +2,13 @@
 
 require 'bundler/gem_tasks'
 require 'rspec/core/rake_task'
+require 'rubocop/rake_task'
+
+RuboCop::RakeTask.new
 
 RSpec::Core::RakeTask.new('spec') do |spec|
   spec.pattern = 'spec/**/*_spec.rb'
   spec.rspec_opts = '--tag ~broken'
-end
-
-require 'rubocop'
-if defined? RuboCop
-  desc 'run rubocop'
-  task :rubocop do
-    puts `rubocop`
-  end
 end
 
 task default: [:spec, :rubocop]
