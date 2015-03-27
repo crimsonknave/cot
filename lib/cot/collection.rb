@@ -69,11 +69,8 @@ module Cot
 
     def initialize_objects(objects)
       @objects = objects.map do |payload|
-        if @options[:sub_key]
-          self.class.klass.new @options[:default_attributes].merge(payload.fetch(@options[:sub_key], {}))
-        else
-          self.class.klass.new @options[:default_attributes].merge(payload)
-        end
+        payload = payload.fetch(@options[:sub_key], {}) if @options[:sub_key]
+        self.class.klass.new @options[:default_attributes].merge(payload)
       end
 
       # Set the delegator methods to point to the new objects array

@@ -68,7 +68,6 @@ module Cot
       end
 
       define_method "#{name}=" do |value|
-        #FIXME eql?
         public_send("#{name}_will_change!") unless value.eql?(self[name])
         self[name] = value
       end

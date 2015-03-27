@@ -97,7 +97,40 @@ describe Cot::Frame do
       expect(foo.defined_properties).to eq []
     end
   end
+
+  context 'value_blocks' do
+    it 'defaults to {}' do
+      class EmptyObject < Cot::Frame
+      end
+      foo = EmptyObject.new
+      expect(foo.value_blocks).to eq({})
+    end
+
+    it 'has nil for no values' do
+      expect(@foo.value_blocks).to eq(foo: nil, id: nil, only: nil)
+    end
+  end
+
+  context 'missing_blocks' do
+    it 'defaults to {}' do
+      class EmptyObject < Cot::Frame
+      end
+      foo = EmptyObject.new
+      expect(foo.missing_blocks).to eq({})
+    end
+
+    it 'has nil for no values' do
+      expect(@foo.missing_blocks).to eq(foo: nil, id: nil, only: nil)
+    end
+  end
+
   context 'properties_mapping' do
+    it 'defaults to {}' do
+      class EmptyObject < Cot::Frame
+      end
+      foo = EmptyObject.new
+      expect(foo.properties_mapping).to eq({})
+    end
     it 'does not set if there is no from' do
       expect(@foo.properties_mapping).to_not have_key nil
     end

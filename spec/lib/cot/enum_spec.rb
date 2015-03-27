@@ -37,7 +37,8 @@ describe Cot::Enum do
           entry :first_again, value: 1
         end
       end
-    end.to raise_error StandardError, 'first_again tried to set value 1, which is already used by first. Enum values are unique.'
+    end.to raise_error StandardError,
+                       'first_again tried to set value 1, which is already used by first. Enum values are unique.'
   end
 
   context 'objext' do

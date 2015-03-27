@@ -25,7 +25,15 @@ module Cot
     end
 
     def properties_mapping
-      self.class.mappings
+      self.class.mappings || {}
+    end
+
+    def value_blocks
+      self.class.value_blocks || {}
+    end
+
+    def missing_blocks
+      self.class.missing_blocks || {}
     end
 
     def inverted_properties_mapping
@@ -45,8 +53,8 @@ module Cot
     end
 
     def []=(key, value)
-      if self.class.value_blocks[key]
-        block = self.class.value_blocks[key]
+      if value_blocks[key]
+        block = value_blocks[key]
         value = instance_exec(value, &block)
       end
       @data[key] = value
@@ -75,8 +83,8 @@ module Cot
 
     def add_missing_blocks
       defined_properties.each do |prop|
-        if self[prop].nil? && self.class.missing_blocks[prop]
-          block = self.class.missing_blocks[prop]
+        if self[prop].nil? && missing_blocks[prop]
+          block = missing_blocks[prop]
           self[prop] = instance_exec(&block)
         end
       end
@@ -84,8 +92,8 @@ module Cot
 
     def add_value_blocks
       @data.each do |k, v|
-        if self.class.value_blocks[k]
-          block = self.class.value_blocks[k]
+        if value_blocks[k]
+          block = value_blocks[k]
           @data[k] = instance_exec(v, &block)
         end
       end
