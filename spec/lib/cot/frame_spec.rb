@@ -1,13 +1,16 @@
 require 'spec_helper'
+class EmptyObject < Cot::Frame; end
+class TestObject < Cot::Frame
+  property :foo, from: :bar, searchable: true
+  property :id
+  property :only, searchable: true
+  property 'stringy', from: 'string_source', searchable: true
+  search_property :john, from: :crichton
+  search_property :pilot
+end
+
 describe Cot::Frame do
   before :each do
-    class TestObject < Cot::Frame
-      property :foo, from: :bar, searchable: true
-      property :id
-      property :only, searchable: true
-      search_property :john, from: :crichton
-      search_property :pilot
-    end
     @foo = TestObject.new(bar: 'this will be foo', id: 5, only: 3)
   end
   subject { @foo }
@@ -22,7 +25,7 @@ describe Cot::Frame do
   context 'serializable_hash' do
     its(:serializable_hash) { should be_kind_of Hash }
     it 'has two keys' do
-      expect(subject.serializable_hash.size).to eq 3
+      expect(subject.serializable_hash.size).to eq 4
     end
 
     it 'should accept an option hash' do
@@ -50,10 +53,10 @@ describe Cot::Frame do
 
     context 'except option' do
       it 'should not return properties specified' do
-        expect(subject.serializable_hash(except: :foo).size).to eq 2
+        expect(subject.serializable_hash(except: :foo).size).to eq 3
         expect(subject.serializable_hash(except: :foo)[:id]).to eq 5
-        expect(subject.serializable_hash(except: [:foo, :id]).size).to eq 1
-        expect(subject.serializable_hash(except: 'foo').size).to eq 2
+        expect(subject.serializable_hash(except: [:foo, :id]).size).to eq 2
+        expect(subject.serializable_hash(except: 'foo').size).to eq 3
         expect(subject.serializable_hash(except: 'foo')[:id]).to eq 5
       end
     end
@@ -81,6 +84,7 @@ describe Cot::Frame do
       expect(foo.exists?).to be_falsey
     end
   end
+
   context 'defined_properties' do
     it 'includes foo' do
       expect(@foo.defined_properties).to include :foo
@@ -91,8 +95,6 @@ describe Cot::Frame do
     end
 
     it 'defaults to []' do
-      class EmptyObject < Cot::Frame
-      end
       foo = EmptyObject.new
       expect(foo.defined_properties).to eq []
     end
@@ -100,34 +102,28 @@ describe Cot::Frame do
 
   context 'value_blocks' do
     it 'defaults to {}' do
-      class EmptyObject < Cot::Frame
-      end
       foo = EmptyObject.new
       expect(foo.value_blocks).to eq({})
     end
 
     it 'has nil for no values' do
-      expect(@foo.value_blocks).to eq(foo: nil, id: nil, only: nil)
+      expect(@foo.value_blocks.values.compact).to be_empty
     end
   end
 
   context 'missing_blocks' do
     it 'defaults to {}' do
-      class EmptyObject < Cot::Frame
-      end
       foo = EmptyObject.new
       expect(foo.missing_blocks).to eq({})
     end
 
     it 'has nil for no values' do
-      expect(@foo.missing_blocks).to eq(foo: nil, id: nil, only: nil)
+      expect(@foo.missing_blocks.values.compact).to be_empty
     end
   end
 
   context 'properties_mapping' do
     it 'defaults to {}' do
-      class EmptyObject < Cot::Frame
-      end
       foo = EmptyObject.new
       expect(foo.properties_mapping).to eq({})
     end
@@ -200,21 +196,45 @@ describe Cot::Frame do
       expect(TestObject.attr_methods).to include(:foo)
     end
 
+    it 'adds to attr_methods as symbols' do
+      expect(TestObject.attr_methods).to include(:stringy)
+    end
+
     it 'accessor methods uses []' do
       foo = TestObject.new
       expect(foo).to receive('[]').once.and_return 'this is foo'
       expect(foo.foo).to eq 'this is foo'
     end
 
+    it 'adds to mappings' do
+      expect(TestObject.mappings).to have_key :bar
+      expect(TestObject.mappings[:bar]).to be :foo
+    end
+
+    it 'adds to mappings as a symbol' do
+      expect(TestObject.mappings).to have_key :string_source
+      expect(TestObject.mappings[:string_source]).to be :stringy
+    end
+
+    it 'stores searchable' do
+      expect(TestObject.search_mappings).to have_key :foo
+      expect(TestObject.search_mappings[:foo]).to be :bar
+    end
+
+    it 'stores searchable as symbols' do
+      expect(TestObject.search_mappings).to have_key :stringy
+      expect(TestObject.search_mappings[:stringy]).to be :string_source
+    end
+
     context 'passing a block' do
-      before :each do
+      before :all do
         class Foo
           attr_reader :params
           def initialize(params)
             @params = params
           end
         end
-        class TestObject < Cot::Frame
+        class BlockObject < Cot::Frame
           property :my_id, from: :key, primary: true
           property :foo, from: :bar
           property :blank do
@@ -230,27 +250,20 @@ describe Cot::Frame do
             end
           end
         end
-        @foo = TestObject.new(stuff: { key: 'this will be in foo' }, key: 42)
       end
 
-      it 'adds to mappings' do
-        expect(TestObject.mappings).to have_key :stuff
-        expect(TestObject.mappings[:stuff]).to be :thing
-      end
-
-      it 'stores searchable' do
-        expect(TestObject.search_mappings).to have_key :thing
-        expect(TestObject.search_mappings[:thing]).to be :stuff
+      before :each do
+        @foo = BlockObject.new(stuff: { key: 'this will be in foo' }, key: 42)
       end
 
       context 'missing' do
         it 'does not call the block if the value is provided' do
-          foo = TestObject.new(blank: 'blank')
+          foo = BlockObject.new(blank: 'blank')
           expect(foo.blank).to eq 'blank'
         end
 
         it 'does not set the block if missing is false' do
-          foo = TestObject.new(blank: 'blank')
+          foo = BlockObject.new(blank: 'blank')
           expect(foo.foo).to be_nil
         end
 
@@ -259,7 +272,7 @@ describe Cot::Frame do
         end
 
         it 'returns nil if there is no block' do
-          expect(@foo.id).to be_nil
+          expect(@foo.foo).to be_nil
         end
       end
 
@@ -284,7 +297,7 @@ describe Cot::Frame do
 
       context '[]=' do
         it 'sets the value block' do
-          bar = TestObject.new(key: 42)
+          bar = BlockObject.new(key: 42)
           bar.thing = { key: 'this will be in foo' }
           expect(bar.thing).to be_kind_of Foo
           expect(bar.thing.params[:passed]).to eq 42

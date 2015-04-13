@@ -2,8 +2,7 @@ require 'simplecov'
 
 ENV['RAILS_ENV'] ||= 'test'
 
-require 'simplecov'
-SimpleCov.start
+SimpleCov.start unless ENV['SKIP_COVERAGE']
 
 require 'cot'
 require 'rspec'

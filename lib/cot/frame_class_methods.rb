@@ -45,8 +45,12 @@ module Cot
     end
 
     def set_mappings(name, prop)
+      name = name.to_sym
       key = prop.from
-      @mappings[key] = name if key
+      if key
+        key = key.to_sym
+        @mappings[key] = name
+      end
       @search_mappings[name] = key ? key : name if prop.searchable
       attr_methods << name
     end

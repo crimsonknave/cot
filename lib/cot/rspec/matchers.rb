@@ -17,7 +17,7 @@ RSpec::Matchers.define :set_property do |field|
   match do |base|
     @tests = {}
     @tests[:attr_methods] = base.attr_methods.include?(field.to_sym)
-    @tests[:mappings] =  base.mappings[@from.to_sym] == field if @from
+    @tests[:mappings] =  base.mappings[@from.to_sym] == field.to_sym if @from
     if @searchable
       key = @from ? @from : field
       @tests[:searchable] = base.search_mappings[field] == key
