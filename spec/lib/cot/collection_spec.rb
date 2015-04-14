@@ -4,8 +4,14 @@ class FakeDouble < Cot::Frame
   property :foo
   property :fooy
 end
+class ExampleCollection < Cot::Collection
+end
 
 describe Cot::Collection do
+  after :each do
+    ExampleCollection.klass = nil
+  end
+
   let(:obj1) { FakeDouble.new id: 1, foo: :bar }
   let(:obj2) { FakeDouble.new id: 2, foo: :bar }
   subject(:collection) { Cot::Collection.new FakeDouble, [obj1, obj2] }
@@ -73,29 +79,29 @@ describe Cot::Collection do
     context 'when passing a class' do
       context 'with options' do
         it 'takes an optional sub_key option to pull the object out of the payload' do
-          coll = Cot::Collection.new FakeDouble,
-                                     [{ inner: { fooy: :bar } }, { inner: { asdf: :fdas } }],
-                                     sub_key: :inner
+          coll = ExampleCollection.new FakeDouble,
+                                       [{ inner: { fooy: :bar } }, { inner: { asdf: :fdas } }],
+                                       sub_key: :inner
           expect(coll.first).to be_kind_of FakeDouble
           expect(coll.first.fooy).to eq :bar
         end
 
         it 'takes options as strings and symbols' do
-          coll = Cot::Collection.new FakeDouble,
-                                     [{ inner: { fooy: :bar } }, { inner: { asdf: :fdas } }],
-                                     'sub_key' => :inner
+          coll = ExampleCollection.new FakeDouble,
+                                       [{ inner: { fooy: :bar } }, { inner: { asdf: :fdas } }],
+                                       'sub_key' => :inner
           expect(coll.first).to be_kind_of FakeDouble
           expect(coll.first.fooy).to eq :bar
         end
 
         it 'takes an optional default_attributes option to add set attributes in every object.' do
-          coll = Cot::Collection.new FakeDouble, [{ fooy: :bar }, { asdf: :fdas }], default_attributes: { foo: :baz }
+          coll = ExampleCollection.new FakeDouble, [{ fooy: :bar }, { asdf: :fdas }], default_attributes: { foo: :baz }
           expect(coll).to all be_kind_of FakeDouble
           expect(coll.map(&:foo).uniq).to eq [:baz]
         end
 
         it 'supports a legacy optional sub_key parameter to pull the object out of the payload' do
-          coll = Cot::Collection.new FakeDouble, [{ inner: { fooy: :bar } }, { inner: { asdf: :fdas } }], :inner
+          coll = ExampleCollection.new FakeDouble, [{ inner: { fooy: :bar } }, { inner: { asdf: :fdas } }], :inner
           expect(coll.first).to be_kind_of FakeDouble
           expect(coll.first.fooy).to eq :bar
         end
@@ -103,22 +109,22 @@ describe Cot::Collection do
 
       context 'without options' do
         it 'does not process the objects if they are already the correct class' do
-          coll = Cot::Collection.new [FakeDouble.new(fooy: :bar), FakeDouble.new(asdf: :fdas)]
+          coll = ExampleCollection.new FakeDouble, [FakeDouble.new(fooy: :bar), FakeDouble.new(asdf: :fdas)]
           expect(coll.first).to be_kind_of FakeDouble
         end
 
         it 'does not set the subkey if none is provided' do
-          coll = Cot::Collection.new [FakeDouble.new(fooy: :bar), FakeDouble.new(asdf: :fdas)]
+          coll = ExampleCollection.new FakeDouble, [FakeDouble.new(fooy: :bar), FakeDouble.new(asdf: :fdas)]
           expect(coll.instance_variable_get :@options).to_not have_key :sub_key
         end
 
         it 'can accept empty hashes' do
-          coll = Cot::Collection.new FakeDouble, [{}]
+          coll = ExampleCollection.new FakeDouble, [{}]
           expect(coll.first).to be_kind_of FakeDouble
         end
 
         it 'creates new instances of the passed klass if the objects are not already the class' do
-          coll = Cot::Collection.new FakeDouble, [{ fooy: :bar }, { asdf: :fdas }]
+          coll = ExampleCollection.new FakeDouble, [{ fooy: :bar }, { asdf: :fdas }]
           expect(coll.first).to be_kind_of FakeDouble
         end
       end
@@ -169,28 +175,34 @@ describe Cot::Collection do
 
       context 'without options' do
         it 'does not process the objects if they are already the correct class' do
-          coll = Cot::Collection.new [FakeDouble.new(fooy: :bar), FakeDouble.new(asdf: :fdas)]
+          coll = MyCollection.new [FakeDouble.new(fooy: :bar), FakeDouble.new(asdf: :fdas)]
           expect(coll.first).to be_kind_of FakeDouble
         end
 
         it 'creates new instances of the passed klass if the objects are not already the class' do
-          coll = Cot::Collection.new [{ fooy: :bar }, { asdf: :fdas }]
+          coll = MyCollection.new [{ fooy: :bar }, { asdf: :fdas }]
           expect(coll.first).to be_kind_of FakeDouble
         end
       end
+    end
+
+    it 'fails if no klass is set' do
+      class BadCollection < Cot::Collection; end
+      error = 'Collected class not set, please either pass a class to initialize or call collected_class'
+      expect { BadCollection.new }.to raise_error error
     end
   end
 
   context 'update members' do
     it 'updates members' do
-      coll = Cot::Collection.new FakeDouble, [{ fooy: :bar }]
+      coll = ExampleCollection.new FakeDouble, [{ fooy: :bar }]
       expect(coll.length).to eq 1
       coll.update_members [{ id: 123, foo: :bar }]
       expect(coll.first.id).to eq 123
     end
 
     it 'removes members that are not in the payload' do
-      coll = Cot::Collection.new FakeDouble, [{ fooy: :bar }, { asdf: :fdas }]
+      coll = ExampleCollection.new FakeDouble, [{ fooy: :bar }, { asdf: :fdas }]
       expect(coll.length).to eq 2
       coll.update_members [{ id: 123, foo: :bar }]
       expect(coll.first.id).to eq 123
@@ -200,13 +212,13 @@ describe Cot::Collection do
 
   context 'changed?' do
     it 'returns true if one of the objects has changed' do
-      coll = Cot::Collection.new FakeDouble, [{ fooy: :bar }]
+      coll = ExampleCollection.new FakeDouble, [{ fooy: :bar }]
       coll.first.fooy = 'baz'
       expect(coll.changed?).to be true
     end
 
     it 'return false if none of the objects have changed' do
-      coll = Cot::Collection.new FakeDouble, [{ fooy: :bar }]
+      coll = ExampleCollection.new FakeDouble, [{ fooy: :bar }]
       expect(coll.changed?).to be false
     end
   end

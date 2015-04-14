@@ -11,6 +11,9 @@ module Cot
     def initialize(*params)
       parse_params(params)
 
+      if self.class.klass.nil?
+        fail 'Collected class not set, please either pass a class to initialize or call collected_class'
+      end
       # If you pass in different types of things here we can't be friends
       initialize_objects(@objects) unless @objects.first.instance_of? self.class.klass
 
